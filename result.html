@@ -2238,7 +2238,7 @@
                 console.log('PDF生成完成，准备发送...');
                 
                 // 发送到服务器
-                fetch('http://localhost:8001/send_email', {
+                fetch('https://mbtitest-pprl.vercel.app/api/send_email', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
