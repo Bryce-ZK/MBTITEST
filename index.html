@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>专业MBTI性格测试 - 探索你的真实性格类型</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#007AFF',
+                        secondary: '#5856D6',
+                        neutral: '#8E8E93',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="font-sans antialiased">
+    <!-- Header -->
+    <header class="fixed w-full bg-white/90 backdrop-blur-md z-50">
+        <nav class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="text-2xl font-bold text-primary">MBTI专业测评</div>
+                <div class="hidden md:flex space-x-8">
+                    <a href="#features" class="text-gray-600 hover:text-primary">特色功能</a>
+                    <a href="#how-it-works" class="text-gray-600 hover:text-primary">使用流程</a>
+                    <a href="#faq" class="text-gray-600 hover:text-primary">常见问题</a>
+                </div>
+                <a href="test.html" class="bg-primary text-white px-6 py-2 rounded-full hover:bg-blue-600 transition">开始测试</a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="pt-32 pb-20 bg-gradient-to-b from-blue-50 to-white">
+        <div class="container mx-auto px-6 text-center">
+            <h1 class="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
+                探索你的真实性格类型
+            </h1>
+            <p class="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+                基于国际权威MBTI理论，结合最新评测系统，帮助你准确认识自己，找到人生方向
+            </p>
+            <a href="test.html" class="bg-primary text-white text-lg px-8 py-4 rounded-full hover:bg-blue-600 transition shadow-lg inline-block">
+                立即开始测试
+            </a>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-20">
+        <div class="container mx-auto px-6">
+            <h2 class="text-4xl font-bold text-center mb-16">为什么选择我们的测评</h2>
+            <div class="grid md:grid-cols-3 gap-12">
+                <div class="text-center">
+                    <div class="bg-blue-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-4">专业权威</h3>
+                    <p class="text-gray-600">采用国际标准评测体系，确保测试结果的准确性和权威性</p>
+                </div>
+                <div class="text-center">
+                    <div class="bg-blue-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-4">快速高效</h3>
+                    <p class="text-gray-600">根据版本不同15-45分钟即可完成测试，获得详细的性格分析报告</p>
+                </div>
+                <div class="text-center">
+                    <div class="bg-blue-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-4">深度解析</h3>
+                    <p class="text-gray-600">提供全方位的性格特征分析，包括职业发展建议</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How it Works -->
+    <section id="how-it-works" class="py-20 bg-gray-50">
+        <div class="container mx-auto px-6">
+            <h2 class="text-4xl font-bold text-center mb-16">测试流程</h2>
+            <div class="grid md:grid-cols-4 gap-8">
+                <div class="text-center">
+                    <div class="bg-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 shadow-md">
+                        <span class="text-2xl font-bold text-primary">1</span>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-4">选择测试版本</h3>
+                    <p class="text-gray-600">根据需求选择合适的测试类型</p>
+                </div>
+                <div class="text-center">
+                    <div class="bg-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 shadow-md">
+                        <span class="text-2xl font-bold text-primary">2</span>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-4">完成测试题目</h3>
+                    <p class="text-gray-600">诚实回答所有测试问题</p>
+                </div>
+                <div class="text-center">
+                    <div class="bg-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 shadow-md">
+                        <span class="text-2xl font-bold text-primary">3</span>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-4">获取测试结果</h3>
+                    <p class="text-gray-600">立即查看详细的分析报告</p>
+                </div>
+                <div class="text-center">
+                    <div class="bg-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 shadow-md">
+                        <span class="text-2xl font-bold text-primary">4</span>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-4">深度解读</h3>
+                    <p class="text-gray-600">获得专业的建议和指导</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section id="faq" class="py-20">
+        <div class="container mx-auto px-6">
+            <h2 class="text-4xl font-bold text-center mb-16">常见问题</h2>
+            <div class="max-w-3xl mx-auto space-y-8">
+                <div>
+                    <h3 class="text-xl font-semibold mb-4">什么是MBTI性格测试？</h3>
+                    <p class="text-gray-600">MBTI（迈尔斯-布里格斯类型指标）是一个基于荣格类型学理论的性格类型评估工具，用于帮助个人更好地理解自己的性格特征和行为模式。</p>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold mb-4">测试需要多长时间？</h3>
+                    <p class="text-gray-600">根据选择的测试版本不同，标准版需要15-20分钟，专业版需要20-30分钟，完整版需要30-45分钟。建议在不受打扰的环境下完成测试，以确保结果的准确性。</p>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold mb-4">测试结果准确吗？</h3>
+                    <p class="text-gray-600">我们的测试基于科学的MBTI理论，并经过大量实践验证。测试结果的准确性很大程度上取决于测试者回答问题时的真实性和客观性。</p>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold mb-4">如何选择合适的测试版本？</h3>
+                    <p class="text-gray-600">标准版适合个人初步了解自己的性格特征；专业版提供更详细的分析和建议；完整版则适合需要深入了解自己并获得全面指导的用户。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-50 py-12">
+        <div class="container mx-auto px-6 text-center text-gray-600">
+            <p>© 2024 MBTI专业测评. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html> 

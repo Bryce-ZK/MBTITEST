@@ -1,0 +1,2292 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MBTI性格测试 - 专业测评报告</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#007AFF',
+                        secondary: '#5856D6',
+                        neutral: '#8E8E93',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="font-sans antialiased bg-gray-50">
+    <!-- Header -->
+    <header class="fixed w-full bg-white/90 backdrop-blur-md z-50">
+        <nav class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <a href="index.html" class="text-2xl font-bold text-primary">MBTI专业测评</a>
+                <div class="flex items-center space-x-4">
+                    <button onclick="saveToPDF()" class="text-gray-600 hover:text-primary">
+                        保存报告
+                    </button>
+                    <button onclick="shareResults()" class="text-gray-600 hover:text-primary">
+                        分享结果
+                    </button>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="pt-24 pb-20">
+        <div class="container mx-auto px-6 max-w-6xl">
+            <!-- 基础信息展示区 -->
+            <section class="bg-white rounded-2xl shadow-lg p-8 mb-8">
+                <div class="text-center mb-8">
+                    <span id="version-badge" class="inline-block px-4 py-1 rounded-full text-sm font-semibold bg-primary text-white mb-4">专业版报告</span>
+                    <h1 class="text-4xl font-bold text-gray-900 mb-4">您的MBTI类型是：</h1>
+                    <div class="text-6xl font-bold text-primary mb-4" id="mbti-type">INTJ</div>
+                    <h2 class="text-2xl text-gray-600" id="type-title">建筑师型人格</h2>
+                    <p class="mt-4 text-gray-600 max-w-2xl mx-auto" id="type-description"></p>
+                </div>
+
+                <!-- 维度分析 -->
+                <div class="grid md:grid-cols-2 gap-8">
+                    <!-- 维度得分图表 -->
+                    <div>
+                        <h3 class="text-xl font-bold mb-4">维度偏好分析</h3>
+                        <canvas id="dimensionChart" width="400" height="300"></canvas>
+                    </div>
+                    <!-- 维度详细说明 -->
+                    <div class="space-y-4">
+                        <div id="ei-analysis" class="p-4 bg-gray-50 rounded-lg">
+                            <h4 class="font-semibold mb-2">外向 (E) vs 内向 (I)</h4>
+                            <p class="text-gray-600" id="ei-description"></p>
+                        </div>
+                        <div id="sn-analysis" class="p-4 bg-gray-50 rounded-lg">
+                            <h4 class="font-semibold mb-2">感知 (S) vs 直觉 (N)</h4>
+                            <p class="text-gray-600" id="sn-description"></p>
+                        </div>
+                        <div id="tf-analysis" class="p-4 bg-gray-50 rounded-lg">
+                            <h4 class="font-semibold mb-2">思考 (T) vs 情感 (F)</h4>
+                            <p class="text-gray-600" id="tf-description"></p>
+                        </div>
+                        <div id="jp-analysis" class="p-4 bg-gray-50 rounded-lg">
+                            <h4 class="font-semibold mb-2">判断 (J) vs 知觉 (P)</h4>
+                            <p class="text-gray-600" id="jp-description"></p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 性格特质深度解析 -->
+            <section class="bg-white rounded-2xl shadow-lg p-8 mb-8">
+                <h2 class="text-2xl font-bold mb-6">性格特质深度解析</h2>
+                <div class="grid md:grid-cols-1 gap-8">
+                    <div>
+                        <div class="space-y-4" id="core-traits">
+                            <script>
+                                const coreTraits = {
+                                    'INTJ': {
+                                        title: '战略性思考者',
+                                        description: '您是一位富有远见的战略家，具备以下核心特质：\n' +
+                                            '• 独立思考：追求智识上的独立和自主\n' +
+                                            '• 系统规划：善于制定长期战略和系统性解决方案\n' +
+                                            '• 持续改进：不断追求知识和自我完善\n' +
+                                            '• 高标准：对自己和他人都有很高的期望'
+                                    },
+                                    'INTP': {
+                                        title: '逻辑分析者',
+                                        description: '您是一位追求真理的思考者，具备以下核心特质：\n' +
+                                            '• 理论探索：热衷于探索抽象概念和理论\n' +
+                                            '• 创新思维：善于提出独特的解决方案\n' +
+                                            '• 客观分析：保持理性和逻辑的思考方式\n' +
+                                            '• 适应灵活：能够快速适应新的概念和想法'
+                                    },
+                                    'ENTJ': {
+                                        title: '果断领导者',
+                                        description: '您是一位天生的领导者，具备以下核心特质：\n' +
+                                            '• 决策果断：能够快速做出明智的决定\n' +
+                                            '• 目标导向：始终专注于达成目标\n' +
+                                            '• 组织能力：善于调动资源和管理团队\n' +
+                                            '• 战略眼光：能够看到长远的发展机会'
+                                    },
+                                    'ENTP': {
+                                        title: '创新探索者',
+                                        description: '您是一位充满创意的思想家，具备以下核心特质：\n' +
+                                            '• 创新精神：不断探索新的可能性\n' +
+                                            '• 辩论能力：善于进行智力交锋和讨论\n' +
+                                            '• 灵活应变：能够快速适应变化的环境\n' +
+                                            '• 思维敏捷：快速理解和连接不同概念'
+                                    },
+                                    'INFJ': {
+                                        title: '理想追求者',
+                                        description: '您是一位富有洞察力的理想主义者，具备以下核心特质：\n' +
+                                            '• 深度洞察：能够看透表象理解本质\n' +
+                                            '• 同理心强：深刻理解他人的情感需求\n' +
+                                            '• 价值坚守：始终忠于自己的理想和信念\n' +
+                                            '• 创造力强：善于以独特方式表达想法'
+                                    },
+                                    'INFP': {
+                                        title: '和谐追寻者',
+                                        description: '您是一位富有同情心的理想主义者，具备以下核心特质：\n' +
+                                            '• 价值导向：强烈的个人价值观和道德准则\n' +
+                                            '• 创意表达：善于通过艺术形式表达自我\n' +
+                                            '• 同理共情：深刻理解他人的情感体验\n' +
+                                            '• 开放包容：愿意接纳不同的观点和想法'
+                                    },
+                                    'ENFJ': {
+                                        title: '激励引导者',
+                                        description: '您是一位富有感染力的领导者，具备以下核心特质：\n' +
+                                            '• 人际影响：善于激励和引导他人成长\n' +
+                                            '• 团队协作：优秀的团队建设和凝聚能力\n' +
+                                            '• 远见卓识：能够预见发展方向和机会\n' +
+                                            '• 责任担当：愿意为团队和他人付出'
+                                    },
+                                    'ENFP': {
+                                        title: '热情创造者',
+                                        description: '您是一位充满活力的创新者，具备以下核心特质：\n' +
+                                            '• 创意丰富：不断产生新的想法和可能性\n' +
+                                            '• 热情洋溢：对新事物保持浓厚兴趣\n' +
+                                            '• 人际魅力：善于建立广泛的人际关系\n' +
+                                            '• 适应能力：能够在不同环境中快速调整'
+                                    },
+                                    'ISTJ': {
+                                        title: '责任执行者',
+                                        description: '您是一位可靠的实践者，具备以下核心特质：\n' +
+                                            '• 责任心强：对承诺的事情始终负责到底\n' +
+                                            '• 组织严谨：善于建立和维护秩序系统\n' +
+                                            '• 注重细节：关注细节确保准确无误\n' +
+                                            '• 实践导向：将理论转化为具体行动'
+                                    },
+                                    'ISFJ': {
+                                        title: '细心守护者',
+                                        description: '您是一位温暖的照顾者，具备以下核心特质：\n' +
+                                            '• 责任可靠：认真履行对他人的承诺\n' +
+                                            '• 关怀他人：善于觉察和满足他人需求\n' +
+                                            '• 实际可靠：脚踏实地解决具体问题\n' +
+                                            '• 传统尊重：重视并维护既定的价值观'
+                                    },
+                                    'ESTJ': {
+                                        title: '高效管理者',
+                                        description: '您是一位务实的组织者，具备以下核心特质：\n' +
+                                            '• 组织能力：善于规划和执行具体任务\n' +
+                                            '• 效率至上：追求高效率的工作方式\n' +
+                                            '• 实践导向：注重实际效果和可行性\n' +
+                                            '• 责任担当：愿意承担领导责任'
+                                    },
+                                    'ESFJ': {
+                                        title: '和谐维护者',
+                                        description: '您是一位热心的服务者，具备以下核心特质：\n' +
+                                            '• 人际和谐：善于创造融洽的人际关系\n' +
+                                            '• 服务精神：乐于帮助和照顾他人\n' +
+                                            '• 组织能力：擅长安排和协调活动\n' +
+                                            '• 责任心强：认真对待每一项承诺'
+                                    },
+                                    'ISTP': {
+                                        title: '灵活实践者',
+                                        description: '您是一位实用的问题解决者，具备以下核心特质：\n' +
+                                            '• 实践能力：善于动手解决具体问题\n' +
+                                            '• 灵活应变：能够快速适应新的情况\n' +
+                                            '• 逻辑思维：擅长分析和理解系统运作\n' +
+                                            '• 独立自主：喜欢自主决策和行动'
+                                    }
+                                };
+
+                                // 获取用户的MBTI类型并显示相应的核心特质
+                                const mbtiTypeForTraits = localStorage.getItem('mbtiType');
+                                if (mbtiTypeForTraits && coreTraits[mbtiTypeForTraits]) {
+                                    const trait = coreTraits[mbtiTypeForTraits];
+                                    const coreTraitsDiv = document.getElementById('core-traits');
+                                    coreTraitsDiv.innerHTML = `
+                                        <div class="bg-gray-50 p-4 rounded-lg">
+                                            <h4 class="text-lg font-semibold mb-3">${trait.title}</h4>
+                                            <p class="text-gray-700 whitespace-pre-line">${trait.description}</p>
+                                        </div>
+                                    `;
+                                }
+                            </script>
+</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 人际关系分析 -->
+            <section class="bg-white rounded-2xl shadow-lg p-8 mb-8">
+                <h2 class="text-2xl font-bold mb-6">人际关系分析</h2>
+                <div class="grid md:grid-cols-1 gap-8">
+                    <div>
+                        <div class="space-y-4" id="relationship-analysis">
+                            <script>
+                                const relationshipAnalysis = {
+                                    'INTJ': {
+                                        bestMatch: [
+                                            {
+                                                title: '最佳匹配类型1',
+                                                description: '描述最佳匹配类型1的详细内容'
+                                            },
+                                            {
+                                                title: '最佳匹配类型2',
+                                                description: '描述最佳匹配类型2的详细内容'
+                                            }
+                                        ],
+                                        challenges: [
+                                            {
+                                                title: '潜在挑战类型1',
+                                                description: '描述潜在挑战类型1的详细内容'
+                                            },
+                                            {
+                                                title: '潜在挑战类型2',
+                                                description: '描述潜在挑战类型2的详细内容'
+                                            }
+                                        ],
+                                        teamRoles: [
+                                            {
+                                                title: '团队角色定位1',
+                                                description: '描述团队角色定位1的详细内容'
+                                            },
+                                            {
+                                                title: '团队角色定位2',
+                                                description: '描述团队角色定位2的详细内容'
+                                            }
+                                        ]
+                                    },
+                                    'INTP': {
+                                        bestMatch: [
+                                            {
+                                                title: '最佳匹配类型1',
+                                                description: '描述最佳匹配类型1的详细内容'
+                                            },
+                                            {
+                                                title: '最佳匹配类型2',
+                                                description: '描述最佳匹配类型2的详细内容'
+                                            }
+                                        ],
+                                        challenges: [
+                                            {
+                                                title: '潜在挑战类型1',
+                                                description: '描述潜在挑战类型1的详细内容'
+                                            },
+                                            {
+                                                title: '潜在挑战类型2',
+                                                description: '描述潜在挑战类型2的详细内容'
+                                            }
+                                        ],
+                                        teamRoles: [
+                                            {
+                                                title: '团队角色定位1',
+                                                description: '描述团队角色定位1的详细内容'
+                                            },
+                                            {
+                                                title: '团队角色定位2',
+                                                description: '描述团队角色定位2的详细内容'
+                                            }
+                                        ]
+                                    },
+                                    'ENTJ': {
+                                        bestMatch: [
+                                            {
+                                                title: '最佳匹配类型1',
+                                                description: '描述最佳匹配类型1的详细内容'
+                                            },
+                                            {
+                                                title: '最佳匹配类型2',
+                                                description: '描述最佳匹配类型2的详细内容'
+                                            }
+                                        ],
+                                        challenges: [
+                                            {
+                                                title: '潜在挑战类型1',
+                                                description: '描述潜在挑战类型1的详细内容'
+                                            },
+                                            {
+                                                title: '潜在挑战类型2',
+                                                description: '描述潜在挑战类型2的详细内容'
+                                            }
+                                        ],
+                                        teamRoles: [
+                                            {
+                                                title: '团队角色定位1',
+                                                description: '描述团队角色定位1的详细内容'
+                                            },
+                                            {
+                                                title: '团队角色定位2',
+                                                description: '描述团队角色定位2的详细内容'
+                                            }
+                                        ]
+                                    },
+                                    'ENTP': {
+                                        bestMatch: [
+                                            {
+                                                title: '最佳匹配类型1',
+                                                description: '描述最佳匹配类型1的详细内容'
+                                            },
+                                            {
+                                                title: '最佳匹配类型2',
+                                                description: '描述最佳匹配类型2的详细内容'
+                                            }
+                                        ],
+                                        challenges: [
+                                            {
+                                                title: '潜在挑战类型1',
+                                                description: '描述潜在挑战类型1的详细内容'
+                                            },
+                                            {
+                                                title: '潜在挑战类型2',
+                                                description: '描述潜在挑战类型2的详细内容'
+                                            }
+                                        ],
+                                        teamRoles: [
+                                            {
+                                                title: '团队角色定位1',
+                                                description: '描述团队角色定位1的详细内容'
+                                            },
+                                            {
+                                                title: '团队角色定位2',
+                                                description: '描述团队角色定位2的详细内容'
+                                            }
+                                        ]
+                                    },
+                                    'INFJ': {
+                                        bestMatch: [
+                                            {
+                                                title: '最佳匹配类型1',
+                                                description: '描述最佳匹配类型1的详细内容'
+                                            },
+                                            {
+                                                title: '最佳匹配类型2',
+                                                description: '描述最佳匹配类型2的详细内容'
+                                            }
+                                        ],
+                                        challenges: [
+                                            {
+                                                title: '潜在挑战类型1',
+                                                description: '描述潜在挑战类型1的详细内容'
+                                            },
+                                            {
+                                                title: '潜在挑战类型2',
+                                                description: '描述潜在挑战类型2的详细内容'
+                                            }
+                                        ],
+                                        teamRoles: [
+                                            {
+                                                title: '团队角色定位1',
+                                                description: '描述团队角色定位1的详细内容'
+                                            },
+                                            {
+                                                title: '团队角色定位2',
+                                                description: '描述团队角色定位2的详细内容'
+                                            }
+                                        ]
+                                    },
+                                    'INFP': {
+                                        bestMatch: [
+                                            {
+                                                title: '最佳匹配类型1',
+                                                description: '描述最佳匹配类型1的详细内容'
+                                            },
+                                            {
+                                                title: '最佳匹配类型2',
+                                                description: '描述最佳匹配类型2的详细内容'
+                                            }
+                                        ],
+                                        challenges: [
+                                            {
+                                                title: '潜在挑战类型1',
+                                                description: '描述潜在挑战类型1的详细内容'
+                                            },
+                                            {
+                                                title: '潜在挑战类型2',
+                                                description: '描述潜在挑战类型2的详细内容'
+                                            }
+                                        ],
+                                        teamRoles: [
+                                            {
+                                                title: '团队角色定位1',
+                                                description: '描述团队角色定位1的详细内容'
+                                            },
+                                            {
+                                                title: '团队角色定位2',
+                                                description: '描述团队角色定位2的详细内容'
+                                            }
+                                        ]
+                                    },
+                                    'ENFJ': {
+                                        bestMatch: [
+                                            {
+                                                title: '最佳匹配类型1',
+                                                description: '描述最佳匹配类型1的详细内容'
+                                            },
+                                            {
+                                                title: '最佳匹配类型2',
+                                                description: '描述最佳匹配类型2的详细内容'
+                                            }
+                                        ],
+                                        challenges: [
+                                            {
+                                                title: '潜在挑战类型1',
+                                                description: '描述潜在挑战类型1的详细内容'
+                                            },
+                                            {
+                                                title: '潜在挑战类型2',
+                                                description: '描述潜在挑战类型2的详细内容'
+                                            }
+                                        ],
+                                        teamRoles: [
+                                            {
+                                                title: '团队角色定位1',
+                                                description: '描述团队角色定位1的详细内容'
+                                            },
+                                            {
+                                                title: '团队角色定位2',
+                                                description: '描述团队角色定位2的详细内容'
+                                            }
+                                        ]
+                                    },
+                                    'ENFP': {
+                                        bestMatch: [
+                                            {
+                                                title: '最佳匹配类型1',
+                                                description: '描述最佳匹配类型1的详细内容'
+                                            },
+                                            {
+                                                title: '最佳匹配类型2',
+                                                description: '描述最佳匹配类型2的详细内容'
+                                            }
+                                        ],
+                                        challenges: [
+                                            {
+                                                title: '潜在挑战类型1',
+                                                description: '描述潜在挑战类型1的详细内容'
+                                            },
+                                            {
+                                                title: '潜在挑战类型2',
+                                                description: '描述潜在挑战类型2的详细内容'
+                                            }
+                                        ],
+                                        teamRoles: [
+                                            {
+                                                title: '团队角色定位1',
+                                                description: '描述团队角色定位1的详细内容'
+                                            },
+                                            {
+                                                title: '团队角色定位2',
+                                                description: '描述团队角色定位2的详细内容'
+                                            }
+                                        ]
+                                    },
+                                    'ISTJ': {
+                                        bestMatch: [
+                                            {
+                                                title: '最佳匹配类型1',
+                                                description: '描述最佳匹配类型1的详细内容'
+                                            },
+                                            {
+                                                title: '最佳匹配类型2',
+                                                description: '描述最佳匹配类型2的详细内容'
+                                            }
+                                        ],
+                                        challenges: [
+                                            {
+                                                title: '潜在挑战类型1',
+                                                description: '描述潜在挑战类型1的详细内容'
+                                            },
+                                            {
+                                                title: '潜在挑战类型2',
+                                                description: '描述潜在挑战类型2的详细内容'
+                                            }
+                                        ],
+                                        teamRoles: [
+                                            {
+                                                title: '团队角色定位1',
+                                                description: '描述团队角色定位1的详细内容'
+                                            },
+                                            {
+                                                title: '团队角色定位2',
+                                                description: '描述团队角色定位2的详细内容'
+                                            }
+                                        ]
+                                    },
+                                    'ISFJ': {
+                                        bestMatch: [
+                                            {
+                                                title: '最佳匹配类型1',
+                                                description: '描述最佳匹配类型1的详细内容'
+                                            },
+                                            {
+                                                title: '最佳匹配类型2',
+                                                description: '描述最佳匹配类型2的详细内容'
+                                            }
+                                        ],
+                                        challenges: [
+                                            {
+                                                title: '潜在挑战类型1',
+                                                description: '描述潜在挑战类型1的详细内容'
+                                            },
+                                            {
+                                                title: '潜在挑战类型2',
+                                                description: '描述潜在挑战类型2的详细内容'
+                                            }
+                                        ],
+                                        teamRoles: [
+                                            {
+                                                title: '团队角色定位1',
+                                                description: '描述团队角色定位1的详细内容'
+                                            },
+                                            {
+                                                title: '团队角色定位2',
+                                                description: '描述团队角色定位2的详细内容'
+                                            }
+                                        ]
+                                    },
+                                    'ESTJ': {
+                                        bestMatch: [
+                                            {
+                                                title: '最佳匹配类型1',
+                                                description: '描述最佳匹配类型1的详细内容'
+                                            },
+                                            {
+                                                title: '最佳匹配类型2',
+                                                description: '描述最佳匹配类型2的详细内容'
+                                            }
+                                        ],
+                                        challenges: [
+                                            {
+                                                title: '潜在挑战类型1',
+                                                description: '描述潜在挑战类型1的详细内容'
+                                            },
+                                            {
+                                                title: '潜在挑战类型2',
+                                                description: '描述潜在挑战类型2的详细内容'
+                                            }
+                                        ],
+                                        teamRoles: [
+                                            {
+                                                title: '团队角色定位1',
+                                                description: '描述团队角色定位1的详细内容'
+                                            },
+                                            {
+                                                title: '团队角色定位2',
+                                                description: '描述团队角色定位2的详细内容'
+                                            }
+                                        ]
+                                },
+                                'ESFJ': {
+                                        bestMatch: [
+                                            {
+                                                title: '最佳匹配类型1',
+                                                description: '描述最佳匹配类型1的详细内容'
+                                            },
+                                            {
+                                                title: '最佳匹配类型2',
+                                                description: '描述最佳匹配类型2的详细内容'
+                                            }
+                                        ],
+                                        challenges: [
+                                            {
+                                                title: '潜在挑战类型1',
+                                                description: '描述潜在挑战类型1的详细内容'
+                                            },
+                                            {
+                                                title: '潜在挑战类型2',
+                                                description: '描述潜在挑战类型2的详细内容'
+                                            }
+                                        ],
+                                        teamRoles: [
+                                            {
+                                                title: '团队角色定位1',
+                                                description: '描述团队角色定位1的详细内容'
+                                            },
+                                            {
+                                                title: '团队角色定位2',
+                                                description: '描述团队角色定位2的详细内容'
+                                            }
+                                        ]
+                                    },
+                                    'ISTP': {
+                                        bestMatch: [
+                                            {
+                                                title: '最佳匹配类型1',
+                                                description: '描述最佳匹配类型1的详细内容'
+                                            },
+                                            {
+                                                title: '最佳匹配类型2',
+                                                description: '描述最佳匹配类型2的详细内容'
+                                            }
+                                        ],
+                                        challenges: [
+                                            {
+                                                title: '潜在挑战类型1',
+                                                description: '描述潜在挑战类型1的详细内容'
+                                            },
+                                            {
+                                                title: '潜在挑战类型2',
+                                                description: '描述潜在挑战类型2的详细内容'
+                                            }
+                                        ],
+                                        teamRoles: [
+                                            {
+                                                title: '团队角色定位1',
+                                                description: '描述团队角色定位1的详细内容'
+                                            },
+                                            {
+                                                title: '团队角色定位2',
+                                                description: '描述团队角色定位2的详细内容'
+                                            }
+                                        ]
+                                    },
+                                    'ISFP': {
+                                        bestMatch: [
+                                            {
+                                                title: '最佳匹配类型1',
+                                                description: '描述最佳匹配类型1的详细内容'
+                                            },
+                                            {
+                                                title: '最佳匹配类型2',
+                                                description: '描述最佳匹配类型2的详细内容'
+                                            }
+                                        ],
+                                        challenges: [
+                                            {
+                                                title: '潜在挑战类型1',
+                                                description: '描述潜在挑战类型1的详细内容'
+                                            },
+                                            {
+                                                title: '潜在挑战类型2',
+                                                description: '描述潜在挑战类型2的详细内容'
+                                            }
+                                        ],
+                                        teamRoles: [
+                                            {
+                                                title: '团队角色定位1',
+                                                description: '描述团队角色定位1的详细内容'
+                                            },
+                                            {
+                                                title: '团队角色定位2',
+                                                description: '描述团队角色定位2的详细内容'
+                                            }
+                                        ]
+                                    },
+                                    'ESTP': {
+                                        bestMatch: [
+                                            {
+                                                title: '最佳匹配类型1',
+                                                description: '描述最佳匹配类型1的详细内容'
+                                            },
+                                            {
+                                                title: '最佳匹配类型2',
+                                                description: '描述最佳匹配类型2的详细内容'
+                                            }
+                                        ],
+                                        challenges: [
+                                            {
+                                                title: '潜在挑战类型1',
+                                                description: '描述潜在挑战类型1的详细内容'
+                                            },
+                                            {
+                                                title: '潜在挑战类型2',
+                                                description: '描述潜在挑战类型2的详细内容'
+                                            }
+                                        ],
+                                        teamRoles: [
+                                            {
+                                                title: '团队角色定位1',
+                                                description: '描述团队角色定位1的详细内容'
+                                            },
+                                            {
+                                                title: '团队角色定位2',
+                                                description: '描述团队角色定位2的详细内容'
+                                            }
+                                        ]
+                                    },
+                                    'ESFP': {
+                                        bestMatch: [
+                                            {
+                                                title: '最佳匹配类型1',
+                                                description: '描述最佳匹配类型1的详细内容'
+                                            },
+                                            {
+                                                title: '最佳匹配类型2',
+                                                description: '描述最佳匹配类型2的详细内容'
+                                            }
+                                        ],
+                                        challenges: [
+                                            {
+                                                title: '潜在挑战类型1',
+                                                description: '描述潜在挑战类型1的详细内容'
+                                            },
+                                            {
+                                                title: '潜在挑战类型2',
+                                                description: '描述潜在挑战类型2的详细内容'
+                                            }
+                                        ],
+                                        teamRoles: [
+                                            {
+                                                title: '团队角色定位1',
+                                                description: '描述团队角色定位1的详细内容'
+                                            },
+                                            {
+                                                title: '团队角色定位2',
+                                                description: '描述团队角色定位2的详细内容'
+                                            }
+                                        ]
+                                    }
+                                };
+
+                                // 获取用户的MBTI类型并显示相应的最佳匹配类型
+                                const mbtiTypeForMatches = localStorage.getItem('mbtiType');
+                                if (mbtiTypeForMatches && bestMatches[mbtiTypeForMatches]) {
+                                    const match = bestMatches[mbtiTypeForMatches];
+                                    const bestMatchesDiv = document.getElementById('best-matches');
+                                    bestMatchesDiv.innerHTML = `
+                                        <div class="bg-gray-50 p-4 rounded-lg">
+                                            <p class="text-gray-700 whitespace-pre-line">${match.description}</p>
+                                        </div>
+                                    `;
+                                }
+                            </script>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="space-y-4" id="challenging-matches">
+                            <script>
+                                const challengingTypes = {
+                                    'INTJ': {
+                                        title: '需要耐心沟通的类型',
+                                        description: '以下类型可能带来互动挑战：\n' +
+                                            '• ESFJ/ISFJ：过分关注情感和细节，可能与INTJ的系统思维产生冲突\n' +
+                                            '• ESFP/ISFP：即兴决策方式可能与INTJ的长期规划发生碰撞\n' +
+                                            '需要注意：\n' +
+                                            '• 避免过于直接的批评\n' +
+                                            '• 学会欣赏不同的处事方式'
+                                    },
+                                    'INTP': {
+                                        title: '需要情感平衡的类型',
+                                        description: '以下类型可能带来互动挑战：\n' +
+                                            '• ESFJ/ESTJ：过分强调规则和传统，可能限制INTP的创新思维\n' +
+                                            '• ISFP/ESFP：重视即时体验，可能与INTP的理论探索产生分歧\n' +
+                                            '需要注意：\n' +
+                                            '• 培养情感表达能力\n' +
+                                            '• 增强实践导向思维'
+                                    },
+                                    'ENTJ': {
+                                        title: '需要柔和沟通的类型',
+                                        description: '以下类型可能带来互动挑战：\n' +
+                                            '• ISFP/INFP：对直接指令敏感，可能感受到压力\n' +
+                                            '• ISFJ/ESFJ：可能觉得ENTJ过于强势和缺乏同理心\n' +
+                                            '需要注意：\n' +
+                                            '• 培养耐心和同理心\n' +
+                                            '• 平衡效率与情感需求'
+                                    },
+                                    'ENTP': {
+                                        title: '需要稳定合作的类型',
+                                        description: '以下类型可能带来互动挑战：\n' +
+                                            '• ISTJ/ISFJ：可能觉得ENTP过于理论化和不切实际\n' +
+                                            '• ESTJ/ESFJ：对ENTP的创新想法持怀疑态度\n' +
+                                            '需要注意：\n' +
+                                            '• 提高执行力和稳定性\n' +
+                                            '• 注意细节和实际需求'
+                                    },
+                                    'INFJ': {
+                                        title: '需要实践平衡的类型',
+                                        description: '以下类型可能带来互动挑战：\n' +
+                                            '• ESTP/ISTP：过于注重实践，可能忽视INFJ的理想追求\n' +
+                                            '• ESTJ/ENTJ：可能觉得INFJ决策过于谨慎和情感化\n' +
+                                            '需要注意：\n' +
+                                            '• 增强决策效率\n' +
+                                            '• 平衡理想与现实'
+                                    },
+                                    'INFP': {
+                                        title: '需要现实平衡的类型',
+                                        description: '以下类型可能带来互动挑战：\n' +
+                                            '• ESTJ/ISTJ：可能觉得INFP过于理想化和情感化\n' +
+                                            '• ESTP/ENTP：可能对INFP的价值观产生挑战\n' +
+                                            '需要注意：\n' +
+                                            '• 提高执行力和现实感\n' +
+                                            '• 加强逻辑思维能力'
+                                    },
+                                    'ENFJ': {
+                                        title: '需要独立空间的类型',
+                                        description: '以下类型可能带来互动挑战：\n' +
+                                            '• ISTP/INTP：可能觉得ENFJ过于关注他人需求\n' +
+                                            '• ISTJ/ESTJ：可能与ENFJ的灵活方式产生冲突\n' +
+                                            '需要注意：\n' +
+                                            '• 平衡自我需求和他人需求\n' +
+                                            '• 提高独立决策能力'
+                                    },
+                                    'ENFP': {
+                                        title: '需要规划执行的类型',
+                                        description: '以下类型可能带来互动挑战：\n' +
+                                            '• ISTJ/ESTJ：可能觉得ENFP缺乏计划性和稳定性\n' +
+                                            '• ISTP/INTP：可能对ENFP的情感表达不适应\n' +
+                                            '需要注意：\n' +
+                                            '• 提高计划性和执行力\n' +
+                                            '• 加强细节关注度'
+                                    },
+                                    'ISTJ': {
+                                        title: '需要灵活创新的类型',
+                                        description: '以下类型可能带来互动挑战：\n' +
+                                            '• ENFP/INFP：可能觉得ISTJ过于死板和保守\n' +
+                                            '• ENTP/INTP：可能与ISTJ的传统思维产生冲突\n' +
+                                            '需要注意：\n' +
+                                            '• 培养创新思维\n' +
+                                            '• 增强适应变化的能力'
+                                    },
+                                    'ISFJ': {
+                                        title: '需要自主发展的类型',
+                                        description: '以下类型可能带来互动挑战：\n' +
+                                            '• ENTP/ENTJ：可能给ISFJ带来过大压力\n' +
+                                            '• ENFP/INFP：可能与ISFJ的传统观念产生分歧\n' +
+                                            '需要注意：\n' +
+                                            '• 提高独立决策能力\n' +
+                                            '• 培养创新思维'
+                                    },
+                                    'ESTJ': {
+                                        title: '需要情感交流的类型',
+                                        description: '以下类型可能带来互动挑战：\n' +
+                                            '• INFP/ENFP：可能觉得ESTJ过于强势和不近人情\n' +
+                                            '• INTP/INFJ：可能与ESTJ的实用主义产生冲突\n' +
+                                            '需要注意：\n' +
+                                            '• 培养同理心\n' +
+                                            '• 提高情感敏感度'
+                                    },
+                                    'ESFJ': {
+                                        title: '需要独立思考的类型',
+                                        description: '以下类型可能带来互动挑战：\n' +
+                                            '• INTP/INTJ：可能觉得ESFJ过于依赖他人意见\n' +
+                                            '• ISTP/INFP：可能与ESFJ的社交需求产生冲突\n' +
+                                            '需要注意：\n' +
+                                            '• 培养独立判断能力\n' +
+                                            '• 减少对他人认可的依赖'
+                                    },
+                                    'ISTP': {
+                                        title: '需要情感连接的类型',
+                                        description: '以下类型可能带来互动挑战：\n' +
+                                            '• ENFJ/ESFJ：可能觉得ISTP过于冷漠和疏离\n' +
+                                            '• ENFP/INFP：可能与ISTP的实用主义产生分歧\n' +
+                                            '需要注意：\n' +
+                                            '• 提高情感表达能力\n' +
+                                            '• 增强人际互动技巧'
+                                    },
+                                    'ISFP': {
+                                        title: '需要目标规划的类型',
+                                        description: '以下类型可能带来互动挑战：\n' +
+                                            '• ENTJ/INTJ：可能给ISFP带来过大压力\n' +
+                                            '• ESTJ/ISTJ：可能与ISFP的自由风格产生冲突\n' +
+                                            '需要注意：\n' +
+                                            '• 提高目标规划能力\n' +
+                                            '• 加强长期发展意识'
+                                    },
+                                    'ESTP': {
+                                        title: '需要深度思考的类型',
+                                        description: '以下类型可能带来互动挑战：\n' +
+                                            '• INFJ/INTJ：可能觉得ESTP过于表面和短视\n' +
+                                            '• INFP/ENFP：可能与ESTP的实用主义产生分歧\n' +
+                                            '需要注意：\n' +
+                                            '• 培养深度思考能力\n' +
+                                            '• 提高长远规划意识'
+                                    },
+                                    'ESFP': {
+                                        title: '需要系统规划的类型',
+                                        description: '以下类型可能带来互动挑战：\n' +
+                                            '• INTJ/ENTJ：可能觉得ESFP缺乏规划和深度\n' +
+                                            '• ISTJ/ISFJ：可能与ESFP的即兴风格产生冲突\n' +
+                                            '需要注意：\n' +
+                                            '• 提高计划性和组织能力\n' +
+                                            '• 培养系统思维方式'
+                                    }
+                                };
+
+                                // 获取用户的MBTI类型并显示相应的潜在挑战类型
+                                const mbtiTypeForChallenges = localStorage.getItem('mbtiType');
+                                if (mbtiTypeForChallenges && challengingTypes[mbtiTypeForChallenges]) {
+                                    const challenge = challengingTypes[mbtiTypeForChallenges];
+                                    const challengingMatchesDiv = document.getElementById('challenging-matches');
+                                    challengingMatchesDiv.innerHTML = `
+                                        <div class="bg-gray-50 p-4 rounded-lg">
+                                            <p class="text-gray-700 whitespace-pre-line">${challenge.description}</p>
+                                        </div>
+                                    `;
+                                }
+                            </script>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="space-y-4" id="team-roles">
+                            <script>
+                                const teamRoles = {
+                                    'INTJ': {
+                                        title: '战略规划者',
+                                        description: '在团队中的主要贡献：\n' +
+                                            '• 制定长期发展战略和系统方案\n' +
+                                            '• 识别潜在问题和改进机会\n' +
+                                            '• 提供独特的创新视角\n' +
+                                            '• 推动团队持续优化和发展'
+                                    },
+                                    'INTP': {
+                                        title: '理论专家',
+                                        description: '在团队中的主要贡献：\n' +
+                                            '• 解决复杂的理论问题\n' +
+                                            '• 提供深度技术支持\n' +
+                                            '• 开发创新解决方案\n' +
+                                            '• 优化系统和流程'
+                                    },
+                                    'ENTJ': {
+                                        title: '团队领导者',
+                                        description: '在团队中的主要贡献：\n' +
+                                            '• 制定清晰的目标和方向\n' +
+                                            '• 组织和调配团队资源\n' +
+                                            '• 推动项目高效执行\n' +
+                                            '• 激励团队追求卓越'
+                                    },
+                                    'ENTP': {
+                                        title: '创新推动者',
+                                        description: '在团队中的主要贡献：\n' +
+                                            '• 提出创新想法和方案\n' +
+                                            '• 挑战现有思维模式\n' +
+                                            '• 发现新的发展机会\n' +
+                                            '• 促进团队头脑风暴'
+                                    },
+                                    'INFJ': {
+                                        title: '愿景引导者',
+                                        description: '在团队中的主要贡献：\n' +
+                                            '• 构建团队共同愿景\n' +
+                                            '• 关注成员个人发展\n' +
+                                            '• 促进团队和谐氛围\n' +
+                                            '• 提供深度洞察建议'
+                                    },
+                                    'INFP': {
+                                        title: '价值观守护者',
+                                        description: '在团队中的主要贡献：\n' +
+                                            '• 维护团队核心价值观\n' +
+                                            '• 关注成员情感需求\n' +
+                                            '• 提供创意和灵感\n' +
+                                            '• 促进团队认同感'
+                                    },
+                                    'ENFJ': {
+                                        title: '团队激励者',
+                                        description: '在团队中的主要贡献：\n' +
+                                            '• 激发团队潜能\n' +
+                                            '• 建立团队凝聚力\n' +
+                                            '• 协调人际关系\n' +
+                                            '• 培养团队人才'
+                                    },
+                                    'ENFP': {
+                                        title: '创意催化剂',
+                                        description: '在团队中的主要贡献：\n' +
+                                            '• 激发创意思维\n' +
+                                            '• 带来积极能量\n' +
+                                            '• 促进团队互动\n' +
+                                            '• 发现新的可能性'
+                                    },
+                                    'ISTJ': {
+                                        title: '执行专家',
+                                        description: '在团队中的主要贡献：\n' +
+                                            '• 确保任务准确完成\n' +
+                                            '• 建立规范和流程\n' +
+                                            '• 维护团队秩序\n' +
+                                            '• 把控质量标准'
+                                    },
+                                    'ISFJ': {
+                                        title: '团队支持者',
+                                        description: '在团队中的主要贡献：\n' +
+                                            '• 提供可靠支持\n' +
+                                            '• 关注细节需求\n' +
+                                            '• 维护团队稳定\n' +
+                                            '• 照顾团队氛围'
+                                    },
+                                    'ESTJ': {
+                                        title: '项目管理者',
+                                        description: '在团队中的主要贡献：\n' +
+                                            '• 推进项目执行\n' +
+                                            '• 制定具体计划\n' +
+                                            '• 监督任务完成\n' +
+                                            '• 优化工作流程'
+                                    },
+                                    'ESFJ': {
+                                        title: '团队协调者',
+                                        description: '在团队中的主要贡献：\n' +
+                                            '• 协调团队合作\n' +
+                                            '• 维护人际和谐\n' +
+                                            '• 组织团队活动\n' +
+                                            '• 提供实际支持'
+                                    },
+                                    'ISTP': {
+                                        title: '技术专家',
+                                        description: '在团队中的主要贡献：\n' +
+                                            '• 解决技术难题\n' +
+                                            '• 提供实践方案\n' +
+                                            '• 优化工作工具\n' +
+                                            '• 处理紧急问题'
+                                    },
+                                    'ISFP': {
+                                        title: '和谐调和者',
+                                        description: '在团队中的主要贡献：\n' +
+                                            '• 带来审美视角\n' +
+                                            '• 缓解团队矛盾\n' +
+                                            '• 提供创意支持\n' +
+                                            '• 营造温暖氛围'
+                                    },
+                                    'ESTP': {
+                                        title: '行动推动者',
+                                        description: '在团队中的主要贡献：\n' +
+                                            '• 快速解决问题\n' +
+                                            '• 推动即时行动\n' +
+                                            '• 把握机会时机\n' +
+                                            '• 提供实践建议'
+                                    },
+                                    'ESFP': {
+                                        title: '团队活力者',
+                                        description: '在团队中的主要贡献：\n' +
+                                            '• 活跃团队氛围\n' +
+                                            '• 促进团队交流\n' +
+                                            '• 化解紧张情绪\n' +
+                                            '• 带来积极能量'
+                                    }
+                                };
+
+                                // 获取用户的MBTI类型并显示相应的团队角色定位
+                                const mbtiTypeForRoles = localStorage.getItem('mbtiType');
+                                if (mbtiTypeForRoles && teamRoles[mbtiTypeForRoles]) {
+                                    const role = teamRoles[mbtiTypeForRoles];
+                                    const teamRolesDiv = document.getElementById('team-roles');
+                                    teamRolesDiv.innerHTML = `
+                                        <div class="bg-gray-50 p-4 rounded-lg">
+                                            <p class="text-gray-700 whitespace-pre-line">${role.description}</p>
+                                        </div>
+                                    `;
+                                }
+                            </script>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 职业发展指导 -->
+            <section class="bg-white rounded-2xl shadow-lg p-8 mb-8">
+                <h2 class="text-2xl font-bold mb-6">职业发展指导</h2>
+                <div class="grid md:grid-cols-1 gap-8">
+                    <div>
+                        <h3 class="text-xl font-semibold mb-4">适合的职业领域</h3>
+                        <div class="space-y-2" id="career-fields">
+                            <script>
+                                const careerFields = {
+                                    'INTJ': {
+                                        description: '最适合的职业领域：\n' +
+                                            '• 战略规划：管理咨询、企业战略师、商业分析师\n' +
+                                            '• 科技研发：系统架构师、人工智能研究员、技术总监\n' +
+                                            '• 学术研究：科学研究员、大学教授、智库研究员\n' +
+                                            '• 金融投资：投资分析师、基金经理、风险控制专家\n' +
+                                            '• 独立咨询：商业顾问、技术顾问、战略顾问'
+                                    },
+                                    'INTP': {
+                                        description: '最适合的职业领域：\n' +
+                                            '• 科技开发：软件工程师、数据科学家、研发工程师\n' +
+                                            '• 学术研究：理论物理学家、数学研究员、哲学研究员\n' +
+                                            '• 技术分析：系统分析师、算法工程师、技术架构师\n' +
+                                            '• 创新设计：产品设计师、游戏设计师、创新研究员\n' +
+                                            '• 专业咨询：技术顾问、知识产权专家、科技评论家'
+                                    },
+                                    'ENTJ': {
+                                        description: '最适合的职业领域：\n' +
+                                            '• 企业管理：CEO、总经理、企业高管\n' +
+                                            '• 创业领域：创业者、风险投资人、商业开拓者\n' +
+                                            '• 战略发展：战略总监、业务发展总监、并购专家\n' +
+                                            '• 管理咨询：企业顾问、组织变革专家、领导力教练\n' +
+                                            '• 项目管理：项目总监、运营总监、变革管理专家'
+                                    },
+                                    'ENTP': {
+                                        description: '最适合的职业领域：\n' +
+                                            '• 创新创业：创业家、创新总监、产品创新师\n' +
+                                            '• 市场营销：营销策划师、品牌总监、市场开拓者\n' +
+                                            '• 咨询顾问：管理咨询师、创新顾问、战略顾问\n' +
+                                            '• 研发创新：研发总监、创新工程师、发明家\n' +
+                                            '• 创意产业：广告创意总监、媒体策划师、创意总监'
+                                    },
+                                    'INFJ': {
+                                        description: '最适合的职业领域：\n' +
+                                            '• 心理咨询：心理治疗师、职业顾问、生涯规划师\n' +
+                                            '• 教育培训：教育工作者、培训师、人才发展顾问\n' +
+                                            '• 创意写作：作家、编剧、内容创作者\n' +
+                                            '• 公益事业：非营利组织负责人、社会工作者、环保专家\n' +
+                                            '• 人才发展：人力资源总监、组织发展顾问、职业教练'
+                                    },
+                                    'INFP': {
+                                        description: '最适合的职业领域：\n' +
+                                            '• 艺术创作：作家、艺术家、音乐创作人\n' +
+                                            '• 心理辅导：心理咨询师、辅导员、生命教练\n' +
+                                            '• 教育工作：特殊教育教师、艺术教师、语言教师\n' +
+                                            '• 创意设计：平面设计师、插画师、用户体验设计师\n' +
+                                            '• 人文研究：人类学研究员、社会学研究员、文学评论家'
+                                    },
+                                    'ENFJ': {
+                                        description: '最适合的职业领域：\n' +
+                                            '• 教育培训：培训讲师、教育顾问、职业教练\n' +
+                                            '• 人力资源：HR总监、人才发展经理、招聘专家\n' +
+                                            '• 公共关系：公关总监、媒体发言人、外交官\n' +
+                                            '• 非营利组织：NGO负责人、公益项目经理、社会企业家\n' +
+                                            '• 团队管理：团队主管、组织发展顾问、变革管理专家'
+                                    },
+                                    'ENFP': {
+                                        description: '最适合的职业领域：\n' +
+                                            '• 创意产业：广告创意总监、品牌策划师、活动策划师\n' +
+                                            '• 媒体传播：记者、主持人、内容创作者\n' +
+                                            '• 艺术表演：演员、音乐表演家、舞台艺术家\n' +
+                                            '• 市场营销：市场总监、品牌经理、公关经理\n' +
+                                            '• 创新咨询：创新顾问、创业教练、创意总监'
+                                    },
+                                    'ISTJ': {
+                                        description: '最适合的职业领域：\n' +
+                                            '• 金融会计：会计师、审计师、财务分析师\n' +
+                                            '• 法律事务：律师、法务专员、合规专家\n' +
+                                            '• 项目管理：项目经理、质量管理师、运营经理\n' +
+                                            '• 技术支持：系统管理员、数据分析师、IT支持专家\n' +
+                                            '• 行政管理：行政总监、办公室主任、流程管理专家'
+                                    },
+                                    'ISFJ': {
+                                        description: '最适合的职业领域：\n' +
+                                            '• 医疗护理：护士、医疗技师、健康顾问\n' +
+                                            '• 行政支持：行政助理、办公室经理、客户服务主管\n' +
+                                            '• 教育工作：小学教师、特殊教育教师、图书管理员\n' +
+                                            '• 社会服务：社会工作者、康复治疗师、养老服务专家\n' +
+                                            '• 人事管理：人事专员、员工关系主管、福利专员'
+                                    },
+                                    'ESTJ': {
+                                        description: '最适合的职业领域：\n' +
+                                            '• 项目管理：项目经理、工程总监、施工主管\n' +
+                                            '• 金融管理：银行经理、财务总监、风控经理\n' +
+                                            '• 行政管理：行政总监、运营总监、采购经理\n' +
+                                            '• 法律执行：法官、检察官、执法人员\n' +
+                                            '• 生产管理：工厂厂长、生产总监、质量总监'
+                                    },
+                                    'ESFJ': {
+                                        description: '最适合的职业领域：\n' +
+                                            '• 客户服务：客服经理、销售经理、会员服务总监\n' +
+                                            '• 医疗服务：护士长、医疗服务主管、健康管理师\n' +
+                                            '• 教育工作：幼儿教师、小学教师、教务主任\n' +
+                                            '• 人事管理：人力资源经理、培训主管、员工关系经理\n' +
+                                            '• 活动策划：活动总监、会议策划师、婚礼策划师'
+                                    },
+                                    'ISTP': {
+                                        description: '最适合的职业领域：\n' +
+                                            '• 技术工程：机械工程师、电子工程师、维修技师\n' +
+                                            '• 信息技术：系统工程师、网络工程师、安全专家\n' +
+                                            '• 危机处理：应急响应专家、消防员、救援人员\n' +
+                                            '• 技术分析：数据分析师、质量检测员、技术顾问\n' +
+                                            '• 运动领域：运动员、体育教练、户外探险家'
+                                    },
+                                    'ISFP': {
+                                        description: '最适合的职业领域：\n' +
+                                            '• 艺术设计：平面设计师、室内设计师、时装设计师\n' +
+                                            '• 美容美妆：化妆师、美容师、造型师\n' +
+                                            '• 艺术创作：摄影师、画家、手工艺术家\n' +
+                                            '• 医疗康复：物理治疗师、按摩师、芳疗师\n' +
+                                            '• 环境设计：景观设计师、花艺师、园艺师'
+                                    },
+                                    'ESTP': {
+                                        description: '最适合的职业领域：\n' +
+                                            '• 销售市场：销售总监、市场拓展经理、商务谈判专家\n' +
+                                            '• 金融交易：股票交易员、外汇交易员、期货经纪人\n' +
+                                            '• 运动竞技：职业运动员、体育教练、运动经纪人\n' +
+                                            '• 危机管理：消防员、警察、应急响应专家\n' +
+                                            '• 创业投资：创业者、投资人、商业开拓者'
+                                    },
+                                    'ESFP': {
+                                        description: '最适合的职业领域：\n' +
+                                            '• 娱乐表演：演员、主持人、表演艺术家\n' +
+                                            '• 销售服务：零售经理、房地产经纪人、旅游顾问\n' +
+                                            '• 时尚美容：时尚造型师、美妆顾问、个人形象顾问\n' +
+                                            '• 活动策划：活动主持人、派对策划师、娱乐节目制作人\n' +
+                                            '• 餐饮服务：餐厅经理、调酒师、美食评论家'
+                                    }
+                                };
+
+                                // 获取用户的MBTI类型并显示相应的职业领域
+                                const mbtiTypeForCareers = localStorage.getItem('mbtiType');
+                                if (mbtiTypeForCareers && careerFields[mbtiTypeForCareers]) {
+                                    const career = careerFields[mbtiTypeForCareers];
+                                    const careerFieldsDiv = document.getElementById('career-fields');
+                                    careerFieldsDiv.innerHTML = `
+                                        <div class="bg-gray-50 p-4 rounded-lg">
+                                            <p class="text-gray-700 whitespace-pre-line">${career.description}</p>
+                                        </div>
+                                    `;
+                                }
+                            </script>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold mb-4">工作环境偏好</h3>
+                        <div class="space-y-2" id="work-environment">
+                            <script>
+                                const workEnvironments = {
+                                    'INTJ': {
+                                        description: '最适合的工作环境：\n' +
+                                            '• 独立自主的工作空间，能够专注思考和规划\n' +
+                                            '• 注重效率的专业化环境，重视创新和改进\n' +
+                                            '• 有机会实施长期战略规划的平台\n' +
+                                            '• 与其他专业人士进行高水平知识交流\n' +
+                                            '• 能够不断学习和提升的持续发展环境'
+                                    },
+                                    'INTP': {
+                                        description: '最适合的工作环境：\n' +
+                                            '• 灵活开放的研究环境，允许深入探索\n' +
+                                            '• 重视创新和理论突破的学术氛围\n' +
+                                            '• 能够独立思考和解决复杂问题\n' +
+                                            '• 与志同道合者进行思维碰撞\n' +
+                                            '• 较少行政事务干扰的纯粹工作环境'
+                                    },
+                                    'ENTJ': {
+                                        description: '最适合的工作环境：\n' +
+                                            '• 充满挑战和竞争的企业环境\n' +
+                                            '• 能够施展领导才能的管理岗位\n' +
+                                            '• 注重效率和结果导向的团队\n' +
+                                            '• 有机会制定和执行重要决策\n' +
+                                            '• 鼓励创新和持续进步的企业文化'
+                                    },
+                                    'ENTP': {
+                                        description: '最适合的工作环境：\n' +
+                                            '• 鼓励创新和尝试的开放环境\n' +
+                                            '• 充满智力挑战的项目型工作\n' +
+                                            '• 灵活多变，不拘泥于常规的氛围\n' +
+                                            '• 能够自由表达想法和观点\n' +
+                                            '• 与创意人才共事的跨界平台'
+                                    },
+                                    'INFJ': {
+                                        description: '最适合的工作环境：\n' +
+                                            '• 安静和谐的工作氛围\n' +
+                                            '• 注重人文关怀的组织文化\n' +
+                                            '• 能够实现个人价值的平台\n' +
+                                            '• 有助于他人成长的教育环境\n' +
+                                            '• 具有明确使命感的工作场所'
+                                    },
+                                    'INFP': {
+                                        description: '最适合的工作环境：\n' +
+                                            '• 富有创意和人文气息的环境\n' +
+                                            '• 重视个人价值观的组织文化\n' +
+                                            '• 能够自主安排工作节奏\n' +
+                                            '• 支持个性化发展的空间\n' +
+                                            '• 包容和欣赏创意的氛围'
+                                    },
+                                    'ENFJ': {
+                                        description: '最适合的工作环境：\n' +
+                                            '• 团队协作的和谐环境\n' +
+                                            '• 注重人才培养的组织文化\n' +
+                                            '• 能够发挥领导才能的平台\n' +
+                                            '• 重视沟通和人际互动\n' +
+                                            '• 具有积极向上的团队氛围'
+                                    },
+                                    'ENFP': {
+                                        description: '最适合的工作环境：\n' +
+                                            '• 充满活力和创意的氛围\n' +
+                                            '• 鼓励自由表达的开放环境\n' +
+                                            '• 重视创新和多样性\n' +
+                                            '• 灵活机动的工作方式\n' +
+                                            '• 与充满激情的同事共事'
+                                    },
+                                    'ISTJ': {
+                                        description: '最适合的工作环境：\n' +
+                                            '• 结构化和有序的工作环境\n' +
+                                            '• 明确的规章制度和流程\n' +
+                                            '• 稳定可靠的组织体系\n' +
+                                            '• 重视传统和经验的企业\n' +
+                                            '• 注重细节和质量的氛围'
+                                    },
+                                    'ISFJ': {
+                                        description: '最适合的工作环境：\n' +
+                                            '• 温馨友善的工作氛围\n' +
+                                            '• 稳定有序的组织环境\n' +
+                                            '• 重视团队合作的文化\n' +
+                                            '• 能够帮助他人的岗位\n' +
+                                            '• 具有明确工作职责的场所'
+                                    },
+                                    'ESTJ': {
+                                        description: '最适合的工作环境：\n' +
+                                            '• 高效有序的管理环境\n' +
+                                            '• 注重执行力的企业文化\n' +
+                                            '• 明确的目标和时间节点\n' +
+                                            '• 重视规范和标准流程\n' +
+                                            '• 强调责任和结果的氛围'
+                                    },
+                                    'ESFJ': {
+                                        description: '最适合的工作环境：\n' +
+                                            '• 和谐友好的团队氛围\n' +
+                                            '• 重视人际关系的组织\n' +
+                                            '• 稳定可预期的工作环境\n' +
+                                            '• 能够服务他人的平台\n' +
+                                            '• 注重团队合作的文化'
+                                    },
+                                    'ISTP': {
+                                        description: '最适合的工作环境：\n' +
+                                            '• 注重实践的技术环境\n' +
+                                            '• 能够独立操作的工作空间\n' +
+                                            '• 灵活多变的项目任务\n' +
+                                            '• 重视问题解决能力\n' +
+                                            '• 较少约束的自由氛围'
+                                    },
+                                    'ISFP': {
+                                        description: '最适合的工作环境：\n' +
+                                            '• 富有艺术气息的环境\n' +
+                                            '• 重视个人创作空间\n' +
+                                            '• 和谐宁静的工作氛围\n' +
+                                            '• 能够发挥审美才能\n' +
+                                            '• 包容个性化表达的文化'
+                                    },
+                                    'ESTP': {
+                                        description: '最适合的工作环境：\n' +
+                                            '• 充满活力的竞争环境\n' +
+                                            '• 重视实践和行动力\n' +
+                                            '• 提供多样化挑战\n' +
+                                            '• 能够快速决策和反应\n' +
+                                            '• 注重即时成果的氛围'
+                                    },
+                                    'ESFP': {
+                                        description: '最适合的工作环境：\n' +
+                                            '• 充满活力的社交环境\n' +
+                                            '• 重视人际互动的平台\n' +
+                                            '• 富有趣味性的工作内容\n' +
+                                            '• 能够展现个人魅力\n' +
+                                            '• 轻松愉快的团队氛围'
+                                    }
+                                };
+
+                                // 获取用户的MBTI类型并显示相应的工作环境偏好
+                                const mbtiTypeForWork = localStorage.getItem('mbtiType');
+                                if (mbtiTypeForWork && workEnvironments[mbtiTypeForWork]) {
+                                    const environment = workEnvironments[mbtiTypeForWork];
+                                    const workEnvironmentDiv = document.getElementById('work-environment');
+                                    workEnvironmentDiv.innerHTML = `
+                                        <div class="bg-gray-50 p-4 rounded-lg">
+                                            <p class="text-gray-700 whitespace-pre-line">${environment.description}</p>
+                                        </div>
+                                    `;
+                                }
+                            </script>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-8">
+                    <h3 class="text-xl font-semibold mb-4">职业发展路径</h3>
+                    <div class="relative">
+                        <div class="absolute w-1 bg-primary h-full left-1/2 transform -translate-x-1/2"></div>
+                        <div class="space-y-8" id="career-path">
+                            <script>
+                                const careerPaths = {
+                                    'INTJ': {
+                                        description: '职业发展路径：\n' +
+                                            '1. 入职期（1-3年）：\n' +
+                                            '   • 从专业技术岗位起步，积累专业知识\n' +
+                                            '   • 培养系统思维和战略规划能力\n' +
+                                            '   • 建立专业领域的影响力\n\n' +
+                                            '2. 发展期（3-5年）：\n' +
+                                            '   • 向项目负责人或团队主管发展\n' +
+                                            '   • 参与战略规划和决策制定\n' +
+                                            '   • 扩展跨部门合作经验\n\n' +
+                                            '3. 成熟期（5-10年）：\n' +
+                                            '   • 晋升为战略总监或技术总监\n' +
+                                            '   • 主导重要战略项目\n' +
+                                            '   • 建立行业专家地位\n\n' +
+                                            '4. 领导期（10年以上）：\n' +
+                                            '   • 担任高级管理职务\n' +
+                                            '   • 进行组织变革和创新\n' +
+                                            '   • 成为行业思想领袖'
+                                    },
+                                    'INTP': {
+                                        description: '职业发展路径：\n' +
+                                            '1. 入职期（1-3年）：\n' +
+                                            '   • 专注于技术或研究岗位\n' +
+                                            '   • 深入学习专业领域知识\n' +
+                                            '   • 培养问题解决能力\n\n' +
+                                            '2. 发展期（3-5年）：\n' +
+                                            '   • 成为技术专家或研究员\n' +
+                                            '   • 主导创新项目研发\n' +
+                                            '   • 建立专业影响力\n\n' +
+                                            '3. 成熟期（5-10年）：\n' +
+                                            '   • 担任首席工程师或研究主管\n' +
+                                            '   • 指导技术创新方向\n' +
+                                            '   • 发表研究成果或专利\n\n' +
+                                            '4. 领导期（10年以上）：\n' +
+                                            '   • 成为技术总监或研究所长\n' +
+                                            '   • 引领行业技术发展\n' +
+                                            '   • 建立创新研究团队'
+                                    },
+                                    'ENTJ': {
+                                        description: '职业发展路径：\n' +
+                                            '1. 入职期（1-3年）：\n' +
+                                            '   • 从管理培训生或项目专员起步\n' +
+                                            '   • 快速学习业务知识\n' +
+                                            '   • 展现领导潜质\n\n' +
+                                            '2. 发展期（3-5年）：\n' +
+                                            '   • 晋升为项目经理或部门主管\n' +
+                                            '   • 培养团队管理能力\n' +
+                                            '   • 扩展业务影响力\n\n' +
+                                            '3. 成熟期（5-10年）：\n' +
+                                            '   • 担任部门总监或业务总监\n' +
+                                            '   • 参与公司战略决策\n' +
+                                            '   • 建立管理体系\n\n' +
+                                            '4. 领导期（10年以上）：\n' +
+                                            '   • 晋升为高管或创业\n' +
+                                            '   • 主导企业战略发展\n' +
+                                            '   • 实现商业价值创新'
+                                    },
+                                    'ENTP': {
+                                        description: '职业发展路径：\n' +
+                                            '1. 入职期（1-3年）：\n' +
+                                            '   • 在创新或市场岗位起步\n' +
+                                            '   • 积累多领域经验\n' +
+                                            '   • 发展创新思维\n\n' +
+                                            '2. 发展期（3-5年）：\n' +
+                                            '   • 成为创新项目负责人\n' +
+                                            '   • 主导产品创新\n' +
+                                            '   • 建立跨界合作网络\n\n' +
+                                            '3. 成熟期（5-10年）：\n' +
+                                            '   • 担任创新总监或产品总监\n' +
+                                            '   • 引领创新战略\n' +
+                                            '   • 建立创新生态\n\n' +
+                                            '4. 领导期（10年以上）：\n' +
+                                            '   • 创业或担任创新企业高管\n' +
+                                            '   • 引领行业变革\n' +
+                                            '   • 打造创新平台'
+                                    },
+                                    'INFJ': {
+                                        description: '职业发展路径：\n' +
+                                            '1. 入职期（1-3年）：\n' +
+                                            '   • 从助理或培训师起步\n' +
+                                            '   • 积累人际互动经验\n' +
+                                            '   • 发展辅导能力\n\n' +
+                                            '2. 发展期（3-5年）：\n' +
+                                            '   • 成为资深顾问或培训主管\n' +
+                                            '   • 开发培训课程\n' +
+                                            '   • 建立专业声誉\n\n' +
+                                            '3. 成熟期（5-10年）：\n' +
+                                            '   • 担任发展总监或咨询总监\n' +
+                                            '   • 设计发展战略\n' +
+                                            '   • 建立影响力体系\n\n' +
+                                            '4. 领导期（10年以上）：\n' +
+                                            '   • 创办咨询机构或非营利组织\n' +
+                                            '   • 推动社会发展\n' +
+                                            '   • 实现价值传播'
+                                    },
+                                    'INFP': {
+                                        description: '职业发展路径：\n' +
+                                            '1. 入职期（1-3年）：\n' +
+                                            '   • 从创意或人文工作起步\n' +
+                                            '   • 发展艺术才能\n' +
+                                            '   • 积累创作经验\n\n' +
+                                            '2. 发展期（3-5年）：\n' +
+                                            '   • 成为资深创作者或指导师\n' +
+                                            '   • 建立个人风格\n' +
+                                            '   • 扩展影响范围\n\n' +
+                                            '3. 成熟期（5-10年）：\n' +
+                                            '   • 担任创意总监或项目主管\n' +
+                                            '   • 引领创作方向\n' +
+                                            '   • 培养新人才\n\n' +
+                                            '4. 领导期（10年以上）：\n' +
+                                            '   • 创办文化机构或工作室\n' +
+                                            '   • 推广文化价值\n' +
+                                            '   • 实现艺术理想'
+                                    },
+                                    'ENFJ': {
+                                        description: '职业发展路径：\n' +
+                                            '1. 入职期（1-3年）：\n' +
+                                            '   • 从人力资源或培训岗位起步\n' +
+                                            '   • 积累团队管理经验\n' +
+                                            '   • 发展领导才能\n\n' +
+                                            '2. 发展期（3-5年）：\n' +
+                                            '   • 晋升为团队主管或培训经理\n' +
+                                            '   • 设计发展项目\n' +
+                                            '   • 建立团队文化\n\n' +
+                                            '3. 成熟期（5-10年）：\n' +
+                                            '   • 担任人力资源总监或组织发展总监\n' +
+                                            '   • 主导人才战略\n' +
+                                            '   • 推动组织变革\n\n' +
+                                            '4. 领导期（10年以上）：\n' +
+                                            '   • 成为企业高管或创办教育机构\n' +
+                                            '   • 引领组织发展\n' +
+                                            '   • 实现人才价值'
+                                    },
+                                    'ENFP': {
+                                        description: '职业发展路径：\n' +
+                                            '1. 入职期（1-3年）：\n' +
+                                            '   • 从市场或公关岗位起步\n' +
+                                            '   • 发展创意能力\n' +
+                                            '   • 积累人脉资源\n\n' +
+                                            '2. 发展期（3-5年）：\n' +
+                                            '   • 成为创意主管或项目经理\n' +
+                                            '   • 主导创意项目\n' +
+                                            '   • 扩展影响力\n\n' +
+                                            '3. 成熟期（5-10年）：\n' +
+                                            '   • 担任创意总监或品牌总监\n' +
+                                            '   • 引领品牌战略\n' +
+                                            '   • 建立创意团队\n\n' +
+                                            '4. 领导期（10年以上）：\n' +
+                                            '   • 创办创意公司或品牌机构\n' +
+                                            '   • 引领行业趋势\n' +
+                                            '   • 实现创意价值'
+                                    },
+                                    'ISTJ': {
+                                        description: '职业发展路径：\n' +
+                                            '1. 入职期（1-3年）：\n' +
+                                            '   • 从专业技术或行政岗位起步\n' +
+                                            '   • 学习规章制度\n' +
+                                            '   • 培养执行力\n\n' +
+                                            '2. 发展期（3-5年）：\n' +
+                                            '   • 晋升为专业主管或项目经理\n' +
+                                            '   • 完善工作流程\n' +
+                                            '   • 提高管理效率\n\n' +
+                                            '3. 成熟期（5-10年）：\n' +
+                                            '   • 担任运营总监或部门总监\n' +
+                                            '   • 建立管理体系\n' +
+                                            '   • 优化组织结构\n\n' +
+                                            '4. 领导期（10年以上）：\n' +
+                                            '   • 成为企业高管或合伙人\n' +
+                                            '   • 确保组织稳定运营\n' +
+                                            '   • 实现持续发展'
+                                    },
+                                    'ISFJ': {
+                                        description: '职业发展路径：\n' +
+                                            '1. 入职期（1-3年）：\n' +
+                                            '   • 从服务或支持岗位起步\n' +
+                                            '   • 积累专业技能\n' +
+                                            '   • 建立服务意识\n\n' +
+                                            '2. 发展期（3-5年）：\n' +
+                                            '   • 成为资深专员或团队主管\n' +
+                                            '   • 优化服务流程\n' +
+                                            '   • 培养团队协作\n\n' +
+                                            '3. 成熟期（5-10年）：\n' +
+                                            '   • 担任服务总监或运营主管\n' +
+                                            '   • 建立服务标准\n' +
+                                            '   • 提升服务品质\n\n' +
+                                            '4. 领导期（10年以上）：\n' +
+                                            '   • 成为运营总监或服务机构负责人\n' +
+                                            '   • 创新服务模式\n' +
+                                            '   • 实现品质提升'
+                                    },
+                                    'ESTJ': {
+                                        description: '职业发展路径：\n' +
+                                            '1. 入职期（1-3年）：\n' +
+                                            '   • 从管理培训生或执行岗位起步\n' +
+                                            '   • 学习管理技能\n' +
+                                            '   • 提高执行效率\n\n' +
+                                            '2. 发展期（3-5年）：\n' +
+                                            '   • 晋升为项目经理或部门主管\n' +
+                                            '   • 完善管理体系\n' +
+                                            '   • 提升团队效率\n\n' +
+                                            '3. 成熟期（5-10年）：\n' +
+                                            '   • 担任运营总监或区域总监\n' +
+                                            '   • 优化运营体系\n' +
+                                            '   • 扩大业务规模\n\n' +
+                                            '4. 领导期（10年以上）：\n' +
+                                            '   • 成为企业高管或创业者\n' +
+                                            '   • 建立企业体系\n' +
+                                            '   • 实现规模发展'
+                                    },
+                                    'ESFJ': {
+                                        description: '职业发展路径：\n' +
+                                            '1. 入职期（1-3年）：\n' +
+                                            '   • 从客服或行政岗位起步\n' +
+                                            '   • 积累服务经验\n' +
+                                            '   • 建立人际网络\n\n' +
+                                            '2. 发展期（3-5年）：\n' +
+                                            '   • 晋升为团队主管或客户经理\n' +
+                                            '   • 提升服务品质\n' +
+                                            '   • 扩展客户关系\n\n' +
+                                            '3. 成熟期（5-10年）：\n' +
+                                            '   • 担任客服总监或运营总监\n' +
+                                            '   • 建立服务体系\n' +
+                                            '   • 优化客户体验\n\n' +
+                                            '4. 领导期（10年以上）：\n' +
+                                            '   • 成为服务机构负责人或企业高管\n' +
+                                            '   • 创新服务模式\n' +
+                                            '   • 实现品牌价值'
+                                    },
+                                    'ISTP': {
+                                        description: '职业发展路径：\n' +
+                                            '1. 入职期（1-3年）：\n' +
+                                            '   • 从技术或工程岗位起步\n' +
+                                            '   • 积累实践经验\n' +
+                                            '   • 提升专业技能\n\n' +
+                                            '2. 发展期（3-5年）：\n' +
+                                            '   • 成为技术专家或项目主管\n' +
+                                            '   • 解决技术难题\n' +
+                                            '   • 优化工作流程\n\n' +
+                                            '3. 成熟期（5-10年）：\n' +
+                                            '   • 担任技术总监或研发主管\n' +
+                                            '   • 主导技术创新\n' +
+                                            '   • 培养技术团队\n\n' +
+                                            '4. 领导期（10年以上）：\n' +
+                                            '   • 成为技术合伙人或创业者\n' +
+                                            '   • 引领技术发展\n' +
+                                            '   • 实现技术突破'
+                                    },
+                                    'ISFP': {
+                                        description: '职业发展路径：\n' +
+                                            '1. 入职期（1-3年）：\n' +
+                                            '   • 从设计或艺术岗位起步\n' +
+                                            '   • 发展创作能力\n' +
+                                            '   • 建立个人风格\n\n' +
+                                            '2. 发展期（3-5年）：\n' +
+                                            '   • 成为资深设计师或艺术指导\n' +
+                                            '   • 主导创意项目\n' +
+                                            '   • 扩展艺术视野\n\n' +
+                                            '3. 成熟期（5-10年）：\n' +
+                                            '   • 担任设计总监或艺术总监\n' +
+                                            '   • 引领设计趋势\n' +
+                                            '   • 建立创意团队\n\n' +
+                                            '4. 领导期（10年以上）：\n' +
+                                            '   • 创办设计工作室或艺术机构\n' +
+                                            '   • 推广艺术理念\n' +
+                                            '   • 实现艺术价值'
+                                    },
+                                    'ESTP': {
+                                        description: '职业发展路径：\n' +
+                                            '1. 入职期（1-3年）：\n' +
+                                            '   • 从销售或市场岗位起步\n' +
+                                            '   • 积累实战经验\n' +
+                                            '   • 建立业务网络\n\n' +
+                                            '2. 发展期（3-5年）：\n' +
+                                            '   • 晋升为销售经理或业务主管\n' +
+                                            '   • 扩大市场份额\n' +
+                                            '   • 培养团队能力\n\n' +
+                                            '3. 成熟期（5-10年）：\n' +
+                                            '   • 担任销售总监或区域总监\n' +
+                                            '   • 开拓新市场\n' +
+                                            '   • 建立销售体系\n\n' +
+                                            '4. 领导期（10年以上）：\n' +
+                                            '   • 成为商业合伙人或创业者\n' +
+                                            '   • 把握市场机遇\n' +
+                                            '   • 实现商业突破'
+                                    },
+                                    'ESFP': {
+                                        description: '职业发展路径：\n' +
+                                            '1. 入职期（1-3年）：\n' +
+                                            '   • 从公关或活动策划起步\n' +
+                                            '   • 积累活动经验\n' +
+                                            '   • 发展表现力\n\n' +
+                                            '2. 发展期（3-5年）：\n' +
+                                            '   • 成为活动总监或公关经理\n' +
+                                            '   • 策划重要活动\n' +
+                                            '   • 扩展人脉资源\n\n' +
+                                            '3. 成熟期（5-10年）：\n' +
+                                            '   • 担任公关总监或营销总监\n' +
+                                            '   • 打造品牌活动\n' +
+                                            '   • 建立影响力\n\n' +
+                                            '4. 领导期（10年以上）：\n' +
+                                            '   • 创办公关公司或活动机构\n' +
+                                            '   • 引领行业潮流\n' +
+                                            '   • 实现品牌价值'
+                                    }
+                                };
+
+                                // 获取用户的MBTI类型并显示相应的职业发展路径
+                                const mbtiTypeForPath = localStorage.getItem('mbtiType');
+                                if (mbtiTypeForPath && careerPaths[mbtiTypeForPath]) {
+                                    const path = careerPaths[mbtiTypeForPath];
+                                    const careerPathDiv = document.getElementById('career-path');
+                                    
+                                    // 将文本按阶段分割
+                                    const stages = path.description.split('\n\n');
+                                    const firstColumn = stages.slice(0, 2).join('\n\n');  // 入职期和发展期
+                                    const secondColumn = stages.slice(2, 4).join('\n\n'); // 成熟期和领导期
+                                    
+                                    careerPathDiv.innerHTML = `
+                                        <div class="bg-gray-50 p-4 rounded-lg">
+                                            <div class="grid md:grid-cols-2 gap-4">
+                                                <div class="text-gray-700 whitespace-pre-line">${firstColumn}</div>
+                                                <div class="text-gray-700 whitespace-pre-line">${secondColumn}</div>
+                                            </div>
+                                        </div>
+                                    `;
+                                }
+                            </script>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 个人成长建议 -->
+            <section class="bg-white rounded-2xl shadow-lg p-8 mb-8">
+                <h2 class="text-2xl font-bold mb-6">个人成长建议</h2>
+                <div class="grid md:grid-cols-1 gap-8">
+                    <div class="space-y-4" id="growth-advice">
+                        <script>
+                            const growthAdvice = {
+                                'INTJ': {
+                                    advantages: [
+                                        '战略思维能力：善于制定长期规划和系统性解决方案',
+                                        '分析能力：擅长处理复杂问题和数据分析',
+                                        '独立性：能够独立完成任务，自我驱动力强',
+                                        '创新能力：善于提出创新性解决方案',
+                                        '追求完美：对工作质量要求高，注重效率和完善'
+                                    ],
+                                    suggestions: [
+                                        '在团队协作中多表达想法，增进沟通',
+                                        '培养情商，学会理解和照顾他人感受',
+                                        '适当放松完美主义，接受合理的不完美',
+                                        '发展领导才能，学会授权和信任他人',
+                                        '保持开放心态，接纳不同观点和方法'
+                                    ]
+                                },
+                                'INTP': {
+                                    advantages: [
+                                        '逻辑分析能力：擅长解决复杂的理论问题',
+                                        '创新思维：善于提出独特的解决方案',
+                                        '适应能力：能快速掌握新知识和技能',
+                                        '客观公正：能够保持中立的分析视角',
+                                        '探索精神：对新知识和理论充满热情'
+                                    ],
+                                    suggestions: [
+                                        '加强执行力，将想法转化为行动',
+                                        '提高情感表达能力，加强人际沟通',
+                                        '培养时间管理能力，提高工作效率',
+                                        '发展项目管理技能，提高实践能力',
+                                        '学会在完美和效率之间找到平衡'
+                                    ]
+                                },
+                                'ENTJ': {
+                                    advantages: [
+                                        '领导能力：天生的领导者气质，善于统筹全局',
+                                        '决策能力：果断且善于制定战略决策',
+                                        '执行力：高效的目标达成能力',
+                                        '组织能力：擅长规划和资源调配',
+                                        '影响力：善于说服和激励他人'
+                                    ],
+                                    suggestions: [
+                                        '培养同理心，更多关注团队成员感受',
+                                        '提高耐心，给予他人成长的时间和空间',
+                                        '发展倾听能力，接纳不同的观点',
+                                        '平衡工作与生活，注意自我调节',
+                                        '在追求目标时兼顾过程和细节'
+                                    ]
+                                },
+                                'ENTP': {
+                                    advantages: [
+                                        '创新能力：善于发现新机会和可能性',
+                                        '适应力：快速适应新环境和变化',
+                                        '分析能力：擅长解决复杂问题',
+                                        '表达能力：出色的辩论和说服能力',
+                                        '学习能力：对新知识保持开放和热情'
+                                    ],
+                                    suggestions: [
+                                        '加强执行力，坚持将想法付诸实践',
+                                        '培养耐心，提高长期项目的完成度',
+                                        '发展时间管理能力，提高工作效率',
+                                        '注意细节，提升工作质量',
+                                        '建立有效的工作制度和规划'
+                                    ]
+                                },
+                                'INFJ': {
+                                    advantages: [
+                                        '洞察力：对人际关系有深刻的理解',
+                                        '创造力：富有想象力和创新思维',
+                                        '同理心：善于理解和关怀他人',
+                                        '组织能力：善于规划和实现目标',
+                                        '写作能力：擅长文字表达和沟通'
+                                    ],
+                                    suggestions: [
+                                        '建立个人界限，避免过度付出',
+                                        '培养自信，勇于表达个人观点',
+                                        '平衡理想与现实，提高实践能力',
+                                        '学会释放压力，保持心理健康',
+                                        '发展决策能力，减少优柔寡断'
+                                    ]
+                                },
+                                'INFP': {
+                                    advantages: [
+                                        '创造力：丰富的想象力和艺术天赋',
+                                        '同理心：深刻的情感理解能力',
+                                        '适应力：能在不同环境中找到定位',
+                                        '理想主义：追求意义和价值的能力',
+                                        '语言能力：优秀的写作和表达能力'
+                                    ],
+                                    suggestions: [
+                                        '提高执行力，将想法转化为行动',
+                                        '培养时间管理能力，提高效率',
+                                        '建立务实目标，平衡理想与现实',
+                                        '增强决策能力，减少犹豫不决',
+                                        '发展职业规划能力，设定清晰目标'
+                                    ]
+                                },
+                                'ENFJ': {
+                                    advantages: [
+                                        '领导能力：善于激励和引导他人',
+                                        '沟通能力：出色的人际交往技巧',
+                                        '同理心：深刻的情感理解能力',
+                                        '组织能力：善于协调和管理团队',
+                                        '影响力：能有效传达愿景和理念'
+                                    ],
+                                    suggestions: [
+                                        '学会设定界限，避免过度付出',
+                                        '培养独立决策能力，减少依赖',
+                                        '关注自身需求，平衡付出与获取',
+                                        '发展理性分析能力，避免过于情绪化',
+                                        '建立健康的压力管理机制'
+                                    ]
+                                },
+                                'ENFP': {
+                                    advantages: [
+                                        '创造力：丰富的想象力和创新能力',
+                                        '社交能力：出色的人际交往技巧',
+                                        '适应力：快速适应新环境的能力',
+                                        '洞察力：敏锐的观察和理解能力',
+                                        '表达能力：生动的沟通和演讲能力'
+                                    ],
+                                    suggestions: [
+                                        '提高专注力，避免分心',
+                                        '加强时间管理，提高执行效率',
+                                        '培养持续性，坚持长期目标',
+                                        '发展计划能力，建立工作制度',
+                                        '注意细节，提高工作完成度'
+                                    ]
+                                },
+                                'ISTJ': {
+                                    advantages: [
+                                        '执行力：强大的任务完成能力',
+                                        '可靠性：高度负责的工作态度',
+                                        '组织能力：善于建立秩序和规范',
+                                        '细节关注：严谨的工作作风',
+                                        '逻辑思维：理性的分析能力'
+                                    ],
+                                    suggestions: [
+                                        '培养创新思维，接受新的可能性',
+                                        '提高灵活性，适应环境变化',
+                                        '发展情感表达能力，加强沟通',
+                                        '培养开放心态，接纳不同观点',
+                                        '平衡工作与生活，避免过度劳累'
+                                    ]
+                                },
+                                'ISFJ': {
+                                    advantages: [
+                                        '责任心：高度负责的工作态度',
+                                        '细节关注：严谨的执行能力',
+                                        '服务精神：乐于助人的品质',
+                                        '忠诚度：值得信赖的品格',
+                                        '组织能力：善于维护秩序'
+                                    ],
+                                    suggestions: [
+                                        '培养自信，勇于表达需求',
+                                        '发展创新思维，接受新的方法',
+                                        '学会拒绝，设定合理界限',
+                                        '提高决策能力，减少犹豫',
+                                        '关注自我发展，平衡付出与成长'
+                                    ]
+                                },
+                                'ESTJ': {
+                                    advantages: [
+                                        '管理能力：出色的组织和执行力',
+                                        '决策能力：果断的判断和行动力',
+                                        '责任心：可靠的工作态度',
+                                        '效率：高效的任务完成能力',
+                                        '领导力：天生的管理才能'
+                                    ],
+                                    suggestions: [
+                                        '培养同理心，关注他人感受',
+                                        '提高灵活性，接受不同方案',
+                                        '发展创新思维，开放新的可能',
+                                        '平衡效率与关系，注重团队和谐',
+                                        '学会倾听，接纳不同意见'
+                                    ]
+                                },
+                                'ESFJ': {
+                                    advantages: [
+                                        '人际关系：出色的社交能力',
+                                        '组织能力：善于协调和安排',
+                                        '服务精神：热心助人的品质',
+                                        '责任心：可靠的执行能力',
+                                        '团队合作：优秀的协作能力'
+                                    ],
+                                    suggestions: [
+                                        '培养独立决策能力，减少依赖',
+                                        '学会处理冲突，面对负面反馈',
+                                        '发展创新思维，接受新的方法',
+                                        '建立自我价值，不过分依赖他人认可',
+                                        '平衡他人需求和个人发展'
+                                    ]
+                                },
+                                'ISTP': {
+                                    advantages: [
+                                        '实践能力：出色的动手操作技能',
+                                        '问题解决：灵活的应对能力',
+                                        '观察力：敏锐的细节洞察力',
+                                        '冷静：理性的思考方式',
+                                        '适应力：快速适应变化的能力'
+                                    ],
+                                    suggestions: [
+                                        '发展长期规划能力，设定目标',
+                                        '提高情感表达能力，加强沟通',
+                                        '培养团队协作精神，增进合作',
+                                        '建立时间管理意识，提高效率',
+                                        '发展职业规划能力，明确方向'
+                                    ]
+                                },
+                                'ISFP': {
+                                    advantages: [
+                                        '艺术感：敏锐的审美能力',
+                                        '同理心：善解人意的特质',
+                                        '适应力：灵活的应变能力',
+                                        '观察力：细致的感知能力',
+                                        '创造力：独特的艺术表现力'
+                                    ],
+                                    suggestions: [
+                                        '培养规划能力，建立长期目标',
+                                        '提高决断力，增强自信心',
+                                        '发展职业规划意识，明确方向',
+                                        '加强时间管理，提高效率',
+                                        '培养表达能力，加强沟通'
+                                    ]
+                                },
+                                'ESTP': {
+                                    advantages: [
+                                        '行动力：果断的执行能力',
+                                        '应变能力：灵活的问题解决能力',
+                                        '谈判能力：出色的说服技巧',
+                                        '冒险精神：勇于接受挑战',
+                                        '现实主义：务实的处事态度'
+                                    ],
+                                    suggestions: [
+                                        '发展长期规划能力，制定目标',
+                                        '培养耐心，注意细节',
+                                        '提高情感敏感度，加强人际关系',
+                                        '建立时间管理意识，提高效率',
+                                        '平衡风险和稳定，做好规划'
+                                    ]
+                                },
+                                'ESFP': {
+                                    advantages: [
+                                        '社交能力：出色的人际交往技巧',
+                                        '表现力：生动的表达能力',
+                                        '适应力：灵活的应变能力',
+                                        '乐观精神：积极的生活态度',
+                                        '感染力：强大的影响他人能力'
+                                    ],
+                                    suggestions: [
+                                        '培养规划能力，建立长期目标',
+                                        '提高专注力，加强执行力',
+                                        '发展分析能力，提升决策质量',
+                                        '加强时间管理，提高效率',
+                                        '平衡工作与娱乐，提升专业性'
+                                    ]
+                                }
+                            };
+
+                            // 获取用户的MBTI类型并显示相应的成长建议
+                            const mbtiType = localStorage.getItem('mbtiType');
+                            if (mbtiType && growthAdvice[mbtiType]) {
+                                const advice = growthAdvice[mbtiType];
+                                const growthAdviceDiv = document.getElementById('growth-advice');
+                                
+                                growthAdviceDiv.innerHTML = `
+                                    <div class="bg-white rounded-lg p-6">
+                                        <h3 class="text-xl font-bold text-gray-900 mb-4">优势发挥</h3>
+                                        <ul class="list-disc list-inside space-y-2 text-gray-700 mb-6">
+                                            ${advice.advantages.map(adv => `<li>${adv}</li>`).join('')}
+                        </ul>
+                                        
+                                        <h3 class="text-xl font-bold text-gray-900 mb-4">成长建议</h3>
+                                        <ul class="list-disc list-inside space-y-2 text-gray-700">
+                                            ${advice.suggestions.map(sug => `<li>${sug}</li>`).join('')}
+                        </ul>
+                    </div>
+                                `;
+                            }
+                        </script>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 补充说明 -->
+            <section class="bg-white rounded-2xl shadow-lg p-8">
+                <h2 class="text-2xl font-bold mb-6">补充说明</h2>
+                <div class="prose max-w-none text-gray-600">
+                    <p class="mb-4">本报告基于MBTI（迈尔斯-布里格斯类型指标）理论，旨在帮助您更好地了解自己的性格特点和发展潜力。请注意：</p>
+                    <ul class="list-disc list-inside space-y-2">
+                        <li>MBTI类型并非固定不变，可能随个人成长和环境变化而改变</li>
+                        <li>每个类型都有其独特的价值，没有好坏之分</li>
+                        <li>本报告仅供参考，不应作为唯一的决策依据</li>
+                        <li>建议结合专业咨询，获得更全面的指导</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Action Buttons -->
+            <div class="flex justify-center space-x-4 mt-8">
+                <a href="test.html" class="bg-gray-200 text-gray-700 px-6 py-3 rounded-full hover:bg-gray-300 transition">
+                    重新测试
+                </a>
+                <a href="index.html" class="bg-primary text-white px-6 py-3 rounded-full hover:bg-blue-600 transition">
+                    返回首页
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <script src="mbti-types.js"></script>
+    <script>
+        // 页面加载时初始化结果
+        window.onload = function() {
+            // 从localStorage获取测试结果
+            const mbtiType = localStorage.getItem('mbtiType');
+            const dimensionScores = JSON.parse(localStorage.getItem('dimensionScores'));
+            const testVersion = localStorage.getItem('testVersion') || 'basic';
+
+            if (!mbtiType || !dimensionScores) {
+                window.location.href = 'test.html';
+                return;
+            }
+
+            // 更新基本信息
+            document.getElementById('mbti-type').textContent = mbtiType;
+            const typeData = mbtiTypes[mbtiType];
+            document.getElementById('type-title').textContent = typeData.title;
+            document.getElementById('type-description').textContent = typeData.description;
+
+            // 更新维度描述
+            document.getElementById('ei-description').textContent = 
+                dimensionScores.EI > 50 ? dimensionDescriptions.EI.E : dimensionDescriptions.EI.I;
+            document.getElementById('sn-description').textContent = 
+                dimensionScores.SN > 50 ? dimensionDescriptions.SN.S : dimensionDescriptions.SN.N;
+            document.getElementById('tf-description').textContent = 
+                dimensionScores.TF > 50 ? dimensionDescriptions.TF.T : dimensionDescriptions.TF.F;
+            document.getElementById('jp-description').textContent = 
+                dimensionScores.JP > 50 ? dimensionDescriptions.JP.J : dimensionDescriptions.JP.P;
+
+            // 创建维度得分图表
+            const ctx = document.getElementById('dimensionChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['E/I', 'S/N', 'T/F', 'J/P'],
+                    datasets: [{
+                        label: '维度得分',
+                        data: [
+                            dimensionScores.EI,
+                            dimensionScores.SN,
+                            dimensionScores.TF,
+                            dimensionScores.JP
+                        ],
+                        backgroundColor: '#007AFF',
+                        borderColor: '#007AFF',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+
+            // 更新职业匹配
+            const careerMatches = document.getElementById('career-matches');
+            typeData.careers.forEach(career => {
+                const div = document.createElement('div');
+                div.className = 'p-4 bg-gray-50 rounded-lg';
+                div.innerHTML = career;
+                careerMatches.appendChild(div);
+            });
+
+            // 根据版本显示不同内容
+            if (testVersion !== 'basic') {
+                document.getElementById('version-badge').textContent = 
+                    testVersion === 'professional' ? '专业版报告' : '完整版报告';
+            }
+        };
+
+        // 保存为PDF功能
+        function saveToPDF() {
+            const element = document.querySelector('body');
+            const mbtiType = localStorage.getItem('mbtiType');
+            const opt = {
+                margin: 0,
+                filename: `MBTI测试报告_${mbtiType}.pdf`,
+                image: { type: 'jpeg', quality: 1 },
+                html2canvas: { 
+                    scale: 2,
+                    useCORS: true,
+                    logging: false,
+                    letterRendering: true,
+                    windowWidth: document.documentElement.scrollWidth,
+                    windowHeight: document.documentElement.scrollHeight,
+                    scrollX: 0,
+                    scrollY: 0,
+                    x: 0,
+                    y: 0
+                },
+                jsPDF: { 
+                    unit: 'px', 
+                    format: [document.documentElement.scrollWidth, document.documentElement.scrollHeight],
+                    orientation: 'portrait',
+                    hotfixes: ["px_scaling"]
+                }
+            };
+
+            // 保存当前滚动位置
+            const scrollPos = window.scrollY;
+            
+            // 临时隐藏元素
+            const header = document.querySelector('header');
+            const actionButtons = document.querySelector('.flex.justify-center.space-x-4');
+            const originalHeaderPosition = header.style.position;
+            const originalButtonsDisplay = actionButtons.style.display;
+            
+            // 修改样式
+            header.style.position = 'absolute';
+            actionButtons.style.display = 'none';
+            
+            // 滚动到顶部
+            window.scrollTo(0, 0);
+
+            html2pdf().set(opt).from(element).save().then(() => {
+                // 恢复原始状态
+                header.style.position = originalHeaderPosition;
+                actionButtons.style.display = originalButtonsDisplay;
+                window.scrollTo(0, scrollPos);
+            });
+        }
+
+        // 分享结果功能
+        function shareResults() {
+            // 创建邮箱输入对话框
+            const emailDialog = document.createElement('div');
+            emailDialog.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            emailDialog.innerHTML = `
+                <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
+                    <h3 class="text-xl font-bold mb-4">分享测试结果</h3>
+                    <p class="text-gray-600 mb-4">请输入您的邮箱地址，我们将把测试结果发送给您：</p>
+                    <input type="email" id="share-email" placeholder="请输入邮箱地址" 
+                        class="w-full px-4 py-2 border rounded-lg mb-4 focus:outline-none focus:border-primary">
+                    <div class="flex justify-end space-x-4">
+                        <button onclick="closeEmailDialog()" 
+                            class="px-4 py-2 text-gray-600 hover:text-gray-800">取消</button>
+                        <button onclick="sendResultsByEmail()" 
+                            class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-600">发送</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(emailDialog);
+        }
+
+        // 关闭邮箱对话框
+        function closeEmailDialog() {
+            const dialog = document.querySelector('div.fixed.inset-0');
+            if (dialog) {
+                dialog.remove();
+            }
+        }
+
+        // 发送测试结果到邮箱
+        function sendResultsByEmail() {
+            const emailInput = document.getElementById('share-email');
+            const email = emailInput.value.trim();
+            
+            // 验证邮箱格式
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                alert('请输入有效的邮箱地址');
+                return;
+            }
+
+            // 显示加载提示
+            const loadingMsg = document.createElement('div');
+            loadingMsg.id = 'loading-message';
+            loadingMsg.className = 'text-gray-600 mt-2';
+            loadingMsg.textContent = '正在生成并发送PDF，请稍候...';
+            emailInput.parentNode.appendChild(loadingMsg);
+
+            // 生成PDF并发送
+            const element = document.querySelector('main');
+            const mbtiType = localStorage.getItem('mbtiType');
+            const opt = {
+                margin: 0,
+                filename: `MBTI测试报告_${mbtiType}.pdf`,
+                image: { type: 'jpeg', quality: 1 },
+                html2canvas: { 
+                    scale: 2,
+                    useCORS: true,
+                    logging: true,
+                    letterRendering: true,
+                    windowWidth: document.documentElement.scrollWidth,
+                    windowHeight: document.documentElement.scrollHeight
+                },
+                jsPDF: { 
+                    unit: 'px', 
+                    format: [document.documentElement.scrollWidth, document.documentElement.scrollHeight],
+                    orientation: 'portrait',
+                    hotfixes: ["px_scaling"]
+                }
+            };
+
+            // 临时隐藏元素
+            const header = document.querySelector('header');
+            const actionButtons = document.querySelector('.flex.justify-center.space-x-4');
+            const originalHeaderPosition = header.style.position;
+            const originalButtonsDisplay = actionButtons.style.display;
+            
+            // 修改样式
+            header.style.position = 'absolute';
+            actionButtons.style.display = 'none';
+
+            // 生成PDF并发送
+            html2pdf().set(opt).from(element).outputPdf().then(pdf => {
+                // 将PDF转换为base64
+                const pdfBase64 = btoa(pdf);
+                console.log('PDF生成完成，准备发送...');
+                
+                // 发送到服务器
+                fetch('http://localhost:8001/send_email', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        pdfBase64: pdfBase64,
+                        fileName: `MBTI测试报告_${mbtiType}.pdf`
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('测试结果已发送到您的邮箱');
+                    } else {
+                        console.error('服务器错误:', data.error);
+                        console.error('错误堆栈:', data.stack_trace);
+                        alert(`发送失败: ${data.error}\n\n详细错误信息已记录到控制台`);
+                    }
+                })
+                .catch(error => {
+                    console.error('请求错误:', error);
+                    alert(`发送失败: ${error.message}`);
+                })
+                .finally(() => {
+                    // 恢复原始状态
+                    header.style.position = originalHeaderPosition;
+                    actionButtons.style.display = originalButtonsDisplay;
+                    closeEmailDialog();
+                    // 移除加载提示
+                    const loadingMsg = document.getElementById('loading-message');
+                    if (loadingMsg) {
+                        loadingMsg.remove();
+                    }
+                });
+            }).catch(error => {
+                console.error('PDF生成错误:', error);
+                alert(`PDF生成失败: ${error.message}`);
+                // 恢复原始状态
+                header.style.position = originalHeaderPosition;
+                actionButtons.style.display = originalButtonsDisplay;
+                // 移除加载提示
+                const loadingMsg = document.getElementById('loading-message');
+                if (loadingMsg) {
+                    loadingMsg.remove();
+                }
+            });
+        }
+    </script>
+</body>
+</html> 
